@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="GoogleMapsPolygon.widget.GoogleMapsPolygon" needsEntityContext="false" xmlns="http://www.mendix.com/widget/1.0/">
+  <name>Google Maps Polygon</name>
+    <description>A simple widget to plot Polgyons on a Google Map</description>
+    <icon>
+
+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
+	
+	</icon>
+    <properties>
+        <property key="apiAccessKey" type="string" required="false">
+            <caption>Maps API Access Key</caption>
+            <category>Behavior</category>
+            <description>The Google Maps JavaScript API v3 does not require an API key to function correctly. However, Google strongly encourages you to load the Maps API using an APIs Console key which allows you to monitor your application's Maps API usage.</description>
+        </property>   		
+        <property key="mapEntity" type="entity" required="true">
+            <caption>Objects</caption>
+            <category>Data source</category>
+            <description>The objects to show on the map.</description>
+        </property>
+        <property key="xpathConstraint" type="entityConstraint" entityProperty="mapEntity" required="false">
+            <caption>XPath Constraint</caption>
+            <category>Data source</category>
+            <description>The XPath constraint on the objects.</description> 
+        </property>
+        <property key="infoWindowNameLabel" type="string" defaultValue="Name">
+            <caption>Name Label</caption>
+            <category>Interaction</category>
+            <description>The label of the name popping up in the infowindow.</description> 
+        </property>
+        <property key="mapHeight" type="integer" defaultValue="350">
+            <caption>Height</caption>
+            <category>Appearance</category>
+            <description>The map's height in px.</description> 
+        </property>
+        <property key="mapWidth" type="string" defaultValue="100%">
+            <caption>Width</caption>
+            <category>Appearance</category>
+            <description>The map's width in px or percent.</description> 
+        </property>
+		<property key="borderColor" type="string" required="false" defaultValue="">
+            <caption>Border Color</caption>
+            <category>Appearance</category>
+            <description>The border color around the Google Map.</description>
+        </property>
+		<property key="hoverColorPercentage" type="string" defaultValue="0.2">
+            <caption>Hover Color Percentage </caption>
+            <category>Appearance</category>
+            <description>The percentage to lighten (when between 0 and 1) or darken (between -1 and 0) the color of the overlay on mousehover.</description> 
+        </property>
+        <property key="defaultLat" type="string" defaultValue="0.0">
+            <caption>Default latitude</caption>
+            <category>Behavior</category>
+            <description>Default latitude for the map to start at.</description> 
+        </property>
+        <property key="defaultLng" type="string" defaultValue="0.0">
+            <caption>Default longitude</caption>
+            <category>Behavior</category>
+            <description>Default longitude for the map to start at.</description> 
+        </property>
+        <property key="lowestZoom" type="integer" defaultValue="15">
+            <caption>Single item zoom level</caption>
+            <category>Behavior</category>
+            <description>The zoom level used when displaying a single item. 1 is the whole world, 15 is city level, 20 is house level.</description> 
+        </property>
+        <property key="onclickmf" type="microflow" required="false" entityProperty="mapEntity">
+                <caption>On click</caption>
+                <category>Interaction</category>
+                <description>This microflow will be invoked when a specific point on the polygon is clicked.</description>
+                <returnType type="Void"/>
+         </property>
+        <property key="disableInfoWindow" type="boolean" defaultValue="false">
+            <caption>Disable infowindow on click</caption>
+            <category>Interaction</category>
+            <description>When set to true the on click microflow will directly be triggered in stead of via the infowindow.</description> 
+        </property>
+        <!-- Map CONTROLS -->
+        <property key="opt_drag" type="boolean" defaultValue="true">
+            <caption>Drag</caption>
+            <category>Map controls</category>
+            <description>Enable/disable dragging a map using the mouse</description>
+        </property>
+        <property key="opt_mapcontrol" type="boolean" defaultValue="true">
+            <caption>Type</caption>
+            <category>Map controls</category>
+            <description>Enable/disable Map Type control</description>
+        </property>
+        <property key="opt_scroll" type="boolean" defaultValue="true">
+            <caption>Scroll</caption>
+            <category>Map controls</category>
+            <description>Enable/disable using the scrollwheel to zoom in/out</description>
+        </property>
+        <property key="opt_streetview" type="boolean" defaultValue="true">
+            <caption>Streetview</caption>
+            <category>Map controls</category>
+            <description>Enable/disable Streetview control</description>
+        </property>
+        <property key="opt_zoomcontrol" type="boolean" defaultValue="true">
+            <caption>Zoom Control</caption>
+            <category>Map controls</category>
+            <description>Enable/disable Zoom control</description>
+        </property>
+        <property key="opt_tilt" type="enumeration" defaultValue="d0">
+            <caption>Tilt</caption>
+            <category>Map controls</category>
+            <description>Angle of the map. This can be set to 45 degrees, if this is available for some locations and only when using type Satellite or Hybrid. It will automatically switch to 0 degrees if it is not available.</description>
+            <enumerationValues>
+                <enumerationValue key="d0">0</enumerationValue>
+                <enumerationValue key="d45">45</enumerationValue>
+            </enumerationValues>
+        </property>
+        <property key="defaultMapType" type="enumeration" defaultValue="ROADMAP">
+            <caption>Maptype</caption>
+            <category>Appearance</category>
+            <description>Set the default map type</description>
+            <enumerationValues>
+                <enumerationValue key="ROADMAP">Roadmap</enumerationValue>
+                <enumerationValue key="SATELLITE">Satellite</enumerationValue>
+                <enumerationValue key="HYBRID">Hybrid</enumerationValue>
+                <enumerationValue key="TERRAIN">Terrain</enumerationValue>
+            </enumerationValues>
+        </property>
+        <!-- CUSTOMISATION -->
+        <property key="styleArray" type="string" multiline="true" required="false">
+            <caption>Style Array</caption>
+            <category>Customisation</category>
+            <description>Use this to add custom styles to your maps.</description>
+        </property>
+        <property key="coordinatesAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Coordinates Attribute</caption>
+            <category>Data source</category>
+            <description>The array of coordinates to be plotted. String should look like: ((lat1,lng1),(lat2,lng2),(lat3,lng3),(..))</description>
+            <attributeTypes>
+                <attributeType name="String"/>
+            </attributeTypes>
+        </property>
+        <property key="holesAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Holes Attribute</caption>
+            <category>Data source</category>
+            <description>(NOT SUPPORTED YET)(Only applicable for Polygons) The array of the holes in the to be constructed polygon.</description>
+            <attributeTypes>
+                <attributeType name="String"/>
+            </attributeTypes>
+        </property>
+        <property key="objectTypeAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Type Attribute</caption>
+            <category>Data source</category>
+            <description>The attribute that decides whether it is a Polyon or Polyline.</description>
+            <attributeTypes>
+                <attributeType name="Enum"/>
+            </attributeTypes>
+        </property>
+        <property key="reverseCoordinatesAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Reverse Coordinates</caption>
+            <category>Data source</category>
+            <description>The attribute that decides whether the input coordinates should be reversed. Will turn (Lat, Lng) into (Lng, Lat) pairs.</description>
+            <attributeTypes>
+                <attributeType name="Boolean"/>
+            </attributeTypes>
+        </property>
+        <property key="infoWindowAttr" type="attribute" required="false" entityProperty="mapEntity" isPath="optional" pathType="reference">
+            <caption>InfoWindow attribute</caption>
+            <category>Data source</category>
+            <description>The attribute that will be displayed in the InfoWindow. (Not required)</description>
+            <attributeTypes>
+                <attributeType name="String"/> 
+            </attributeTypes>
+        </property>
+		<property key="colorAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Object color</caption>
+            <category>Data source</category>
+            <description>The hexadecimal color of the object. It should start with a '#'.</description> 
+			<attributeTypes>
+                <attributeType name="String"/>
+            </attributeTypes>
+        </property>
+        <property key="strokeWeight" type="integer" defaultValue="3">
+            <caption>Stroke Weight</caption>
+            <category>Appearance</category>
+            <description>The weight of the border of the Polygon / Polyline.</description> 
+        </property>
+        <property key="strokeOpacity" type="string" defaultValue="1.0">
+            <caption>Stroke Opacity</caption>
+            <category>Appearance</category>
+            <description>The Polygon / Polyline opacity between 0.0 and 1.0. The value 0.0 means completely opaque / not visible. Defaults to 1.0.</description> 
+        </property>
+        <property key="consoleLogging" type="boolean" defaultValue="false">
+            <caption>Logging</caption>
+            <category>Console</category>
+            <description>For debugging purposes. 
+			
+			If set to true the widget will add a console.dir (whole object) and console.log (coordinates) for every object retrieved from the database. The results can be checked in the browser itself in the console tab.</description> 
+        </property>
+        <property key="showProgress" type="boolean" defaultValue="true">
+            <caption>Show a progress bar when loading</caption>
+            <category>Loader</category>
+            <description>If the map has a lot of markers to load, it can appear unresponsive. This progress bar will tell the user it is loading the markers</description>
+        </property>
+        <property key="progressMessage" type="translatableString" required="false">
+            <caption>Loading message</caption>
+            <category>Loader</category>
+            <description>The message that appears in the progress bar</description>
+        </property>
+    </properties>
+</widget>
+
