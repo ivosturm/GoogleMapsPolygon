@@ -28,6 +28,11 @@ iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
             <category>Interaction</category>
             <description>The label of the name popping up in the infowindow.</description> 
         </property>
+		<property key="enableDraw" type="boolean" defaultValue="false">
+            <caption>Enable Draw</caption>
+            <category>Interaction</category>
+            <description>This decides whether an extra drawingmanager will be available in the top of the map to toggle between drawing and dragging. When a single already drawn object is shown, this setting to 'Yes' will make the polygon editable.</description> 
+        </property> 
         <property key="mapHeight" type="integer" defaultValue="350">
             <caption>Height</caption>
             <category>Appearance</category>
