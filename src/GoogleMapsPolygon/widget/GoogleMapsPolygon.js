@@ -4,9 +4,9 @@
     ========================
 
     @file      : GoogleMapsPolygon.js
-    @version   : 1.0.0
+    @version   : 2.0.0
     @author    : Ivo Sturm
-    @date      : 13-11-2017
+    @date      : 2-9-2018
     @copyright : First Consulting
     @license   : Apache v2
 
@@ -16,6 +16,7 @@
 	Releases
 	========================
 	v1.0 	Initial release. A widget for plotting Google Polygons and Polylines on a Google Map.
+	v2.0	Added drawing and editing when a new object is created and editing when looking at a single object (dataview)
 */
 
 define([
@@ -52,6 +53,9 @@ define([
 		_infowindow: null,
 		_logNode: 'GoogleMapsPolygon widget: ',
 		_resizeTimer: null,
+		_drawingManager: null,
+		_selectedShape: null,
+		_selectedColor: '#FF0000',	//default color, if not using colorattribute.
 
         postCreate: function () {
 		
@@ -74,7 +78,12 @@ define([
 
             if (!google.maps) {
                 logger.debug(this.id + ".update load Google maps");
-                var params = (this.apiAccessKey !== "") ? "key=" + this.apiAccessKey : "";
+                var params = null;
+				if (this.apiAccessKey !== "") {
+					params = "key=" + this.apiAccessKey + "&libraries=drawing,places";
+				} else {
+					params = "libraries=drawing,places";
+				}
                 if (google.loader && google.loader.Secure === false) {
                     google.loader.Secure = true;
                 }
@@ -191,6 +200,110 @@ define([
 			
 			this._googleMap = new google.maps.Map(this.mapContainer, mapOptions);
 			
+			// if drawing is enabled form Modeler, check if contextobject is empty poly object without coordinates. If so-> Enable, if not Disable.
+			if (this.enableDraw && (this._contextObj.getEntity() === this.mapEntity && this._contextObj.get(this.coordinatesAttr) == "")){
+				
+				var polyOptions = {
+					strokeWeight: 0,
+					fillOpacity: 0.45,
+					editable: true
+				};
+				this._drawingManager = new google.maps.drawing.DrawingManager({
+					drawingMode: google.maps.drawing.OverlayType.POLYGON,
+					drawingControl: true,
+					drawingControlOptions: {
+						position: google.maps.ControlPosition.TOP_CENTER,
+						drawingModes: ['polyline','polygon']
+					},
+					polylineOptions: {
+						editable: true
+					},
+					polygonOptions: polyOptions
+				});
+				
+				this._drawingManager.setMap(this._googleMap);
+				
+				google.maps.event.addListener(this._drawingManager, 'overlaycomplete', lang.hitch(this, function (event){
+					
+					var polyObject,path,coordinates,coordinatesString,objectType;
+					
+					if (event.type != google.maps.drawing.OverlayType.MARKER) {
+						this._drawingManager.setDrawingMode(null);
+						
+						polyObject = event.overlay;						
+						path = polyObject.getPath();
+						coordinates = path.getArray();
+						coordinatesString = coordinates.toString();
+						if (event.type == google.maps.drawing.OverlayType.POLYGON) 	{
+							objectType = 'Polygon';
+						} else if (event.type == google.maps.drawing.OverlayType.POLYLINE){
+							objectType = 'Polyline';
+						}
+						
+						this._setSelection(polyObject);	
+						
+						polyObject.setMap(null);
+						
+						var obj = {
+							coordinatesArray : coordinatesString,
+							color : 'red',
+							objecttype : objectType
+						};
+						
+						// if contextobject is location object not having coordinates yet, it means a single edit mode, block drawing afterwards
+						if (this._contextObj.getEntity() === this.mapEntity && this._contextObj.get(this.coordinatesAttr) == ""){
+							// disable drawing, allowing only 1 object
+							this._drawingManager.setOptions({
+								drawingControl: false
+							});
+							
+							this._contextObj.set(this.coordinatesAttr,coordinates);
+							this._contextObj.set(this.objectTypeAttr,objectType);
+							this._contextObj.set(this.colorAttr,'red');
+							
+							// set default color to red for new markers
+							var color = this._contextObj.get(this.colorAttr);
+							obj.color = color;						
+							// update obj with guid, so dragging works later on
+							obj.guid = this._contextObj.getGuid();
+							obj.id = obj.guid;
+							
+						} else {
+							mx.data.create({
+								entity: this.mapEntity,
+								callback: lang.hitch(this, function(mxObj) {
+
+									mxObj.set(this.coordinatesAttr,coordinates);
+									// set default color to red for new markers
+									mxObj.set(this.colorAttr,'red');
+									
+									// update obj with guid, so dragging works later on
+									obj.guid = mxObj.getGuid();
+									obj.id = obj.guid;
+									
+									mx.data.commit({
+										mxobj: mxObj,
+										callback: lang.hitch(this,function() {
+											
+										}),
+										error: lang.hitch(this, function(e) {
+											console.error(this._logNode + "Could not commit object:", e);
+										})
+									});
+																						
+								}),
+								error: function(e) {
+									console.error(this._logNode + "Could not commit object:", e);
+								}
+							});
+						}
+					
+						this._addGeoObject(obj);
+
+					}
+				}));
+			}
+			
 			this._fetchObjects();
 			
 			this._executeCallback(callback);
@@ -226,7 +339,7 @@ define([
 			// create objects
             dojoArray.forEach(objs, lang.hitch(this,function (obj) {
 				
-			if (obj.coordinatesArray && (obj.objecttype === 'Polygon' |obj.objecttype === 'Polyline')){
+			if (obj.coordinatesArray && (obj.objecttype === 'Polygon' | obj.objecttype === 'Polyline')){
 					this._addGeoObject(obj);
 					validCount++;
 				}
@@ -291,7 +404,9 @@ define([
 					})
                 });
             } else if (!this._contextObj && (xpath.indexOf('[%CurrentObject%]') > -1)) {
-                console.warn(this._logNode + 'No context for xpath, not fetching.');
+                if (this.consoleLogging){
+					console.warn(this._logNode + 'No context for xpath, not fetching.');
+				}
             } else {
                 mx.data.get({
                     xpath: xpath,
@@ -440,6 +555,10 @@ define([
 			
 			if (!this.disableInfoWindow){
 				google.maps.event.addListener(geoObject, "click", dojo.hitch(this, function() {
+					
+					if (this.enableDraw){
+						this._setSelection(geoObject);
+					}
 					if (this._infowindow){
 						this._infowindow.close();
 					}	
@@ -476,11 +595,49 @@ define([
 						}));				
 					}
 				}));
-			} else if (this.onclickmf) {
+			} else if (this.onclickmf && !this.enableDraw) {
                 geoObject.addListener("click", lang.hitch(this, function () {
                     this._execMf(this.onclickmf, obj.guid);
                 }));
             }	
+
+			//Add a dynamic listener to the polygon or polygon click event for the NewEdit screen
+			if (this._objectsArr.length <= 1 && this.enableDraw){
+					google.maps.event.addListener(geoObject, 'mouseup', lang.hitch(this, function (){
+					
+					var MxObj = this._contextObj
+					var path = geoObject.getPath();
+
+					google.maps.event.addListener(path, 'set_at', lang.hitch(this, function (event){
+						// Here do the snapping, after the polygon has been resized
+						var newcoordinates = path.getArray();
+
+						var oldcoordinates = MxObj.coordinatesAttr;
+						if (newcoordinates.toString() != oldcoordinates){
+							for (var r = 0; r < newcoordinates.length; r++) {
+								this.mapBounds.extend(newcoordinates[r]);
+							}
+	
+							MxObj.set(this.coordinatesAttr, newcoordinates.toString());
+							
+						}
+					}));
+
+					google.maps.event.addListener(path, 'insert_at', dojo.hitch(this, function (event){
+						// Here do the snapping, after the polygon has been resized
+						var newcoordinates = path.getArray();
+						var oldcoordinates = MxObj.coordinatesAttr;
+						if (newcoordinates.toString() != oldcoordinates){
+							for (var r = 0; r < newcoordinates.length; r++) {
+								this.mapBounds.extend(newcoordinates[r]);
+							}
+							MxObj.set(this.coordinatesAttr, newcoordinates.toString());
+
+						}
+					}));
+
+				}));
+			}
 
 			if (this.hoverColorPercentage != 0){
 				var hoverColor = this.shadeColor2(obj.color,this.hoverColorPercentage);
@@ -590,6 +747,19 @@ define([
 				}
 			}
 			return polyArray;
+		},
+		_clearSelection : function() {
+			if (this._selectedShape) {
+			  this._selectedShape.setEditable(false);
+			  this._selectedShape = null;
+			}
+		 },
+		_setSelection : function(shape) {
+
+			this._clearSelection();
+			this._selectedShape = shape;
+			shape.setEditable(true);
+			//this.selectColor(shape.get('fillColor') || shape.get('strokeColor'));
 		},
 		_executeCallback: function (cb) {
             if (cb && typeof cb === "function") {
