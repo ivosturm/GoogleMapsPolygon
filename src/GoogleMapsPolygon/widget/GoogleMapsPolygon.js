@@ -4,9 +4,9 @@
     ========================
 
     @file      : GoogleMapsPolygon.js
-    @version   : 2.0.0
+    @version   : 2.1.0
     @author    : Ivo Sturm
-    @date      : 2-9-2018
+    @date      : 3-12-2018
     @copyright : First Consulting
     @license   : Apache v2
 
@@ -17,6 +17,7 @@
 	========================
 	v1.0 	Initial release. A widget for plotting Google Polygons and Polylines on a Google Map.
 	v2.0	Added drawing and editing when a new object is created and editing when looking at a single object (dataview)
+	v2.1	Added fix for redrawing the map with objects when a contextentity, not being the polygon entity is changed and polygon entities are associated to it.
 */
 
 define([
@@ -160,6 +161,10 @@ define([
 						// 20170611 - if contextobject is actual mapEntity object, no need to retrieve from DB again, since we have it already as context
 						if (this._contextObj && this.mapEntity === this._contextObj.getEntity()){
 							this.parseObjects([ this._contextObj ]);
+						} // 20181203 - if contextobject is not same as mapEntity object, retrieve all objects from DB again, since association could have changed. 
+						else if (this._contextObj){
+							this._objectCache = [];
+							this._loadMap();
 						} else {
 							this._loadMap();
 						}
