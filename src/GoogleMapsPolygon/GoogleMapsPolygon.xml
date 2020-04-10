@@ -63,6 +63,11 @@ iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
             <category>Behavior</category>
             <description>Default longitude for the map to start at.</description> 
         </property>
+        <property key="overruleFitBoundsZoom" type="boolean" defaultValue="false">
+            <caption>Overrule single item zoom level</caption>
+            <category>Behavior</category>
+            <description>When set to 'No' Google determines the right zoom level to fit the shape in, if set to 'Yes' the zoom level you set at 'Single item zoom level' is used.</description> 
+        </property>
         <property key="lowestZoom" type="integer" defaultValue="15">
             <caption>Single item zoom level</caption>
             <category>Behavior</category>
@@ -184,10 +189,29 @@ iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
             <category>Appearance</category>
             <description>The weight of the border of the Polygon / Polyline.</description> 
         </property>
-        <property key="strokeOpacity" type="string" defaultValue="1.0">
-            <caption>Stroke Opacity</caption>
-            <category>Appearance</category>
+        <property key="opacityAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Polygon Stroke Opacity</caption>
+            <category>Polygon</category>
             <description>The Polygon / Polyline opacity between 0.0 and 1.0. The value 0.0 means completely opaque / not visible. Defaults to 1.0.</description> 
+            <attributeTypes>
+                <attributeType name="Decimal"/>
+            </attributeTypes>
+        </property>	
+		<property key="lineTypeAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Line Type</caption>
+            <category>Line</category>
+            <description>The type of line. Supported are: Normal, Dashed and Dotted. Use specifically these names in the Enum captions and keys for this attribute.</description> 
+            <attributeTypes>
+                <attributeType name="Enum"/>
+            </attributeTypes>
+        </property>
+		 <property key="lineStrokeWeightAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
+            <caption>Line Stroke Weight</caption>
+            <category>Line</category>
+            <description>The stroke weight (thickness) of the GEOJSON line.</description> 
+            <attributeTypes>
+                <attributeType name="Integer"/>
+            </attributeTypes>
         </property>
         <property key="consoleLogging" type="boolean" defaultValue="false">
             <caption>Logging</caption>
