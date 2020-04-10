@@ -4,9 +4,9 @@
     ========================
 
     @file      : GoogleMapsPolygon.js
-    @version   : 2.1.0
+    @version   : 2.3.0
     @author    : Ivo Sturm
-    @date      : 3-12-2018
+    @date      : 10-4-2020
     @copyright : First Consulting
     @license   : Apache v2
 
@@ -18,6 +18,10 @@
 	v1.0 	Initial release. A widget for plotting Google Polygons and Polylines on a Google Map.
 	v2.0	Added drawing and editing when a new object is created and editing when looking at a single object (dataview)
 	v2.1	Added fix for redrawing the map with objects when a contextentity, not being the polygon entity is changed and polygon entities are associated to it.
+	v2.2	Mendix 8 upgrade
+	v2.3	Added setZoom(this.lowestZoom) to use case where only one object is plotted via overruleFitBounds setting from Studio Pro
+			Added LineType + LineStrokeWeight for Polylines. Added opacity for polygons. 
+			Some jsHint fixes. 
 */
 
 define([
@@ -210,9 +214,15 @@ define([
 				
 				var polyOptions = {
 					strokeWeight: 0,
-					fillOpacity: 0.45,
+					fillOpacity: Number(this._contextObj.get(this.opacityAttr)),
 					editable: true
 				};
+				var polyLineOptions = {
+					strokeWeight: Number(Number(this._contextObj.get(this.lineStrokeWeightAttr))),
+					fillOpacity: Number(this._contextObj.get(this.opacityAttr)),
+					editable: true
+				};
+
 				this._drawingManager = new google.maps.drawing.DrawingManager({
 					drawingMode: google.maps.drawing.OverlayType.POLYGON,
 					drawingControl: true,
@@ -220,9 +230,7 @@ define([
 						position: google.maps.ControlPosition.TOP_CENTER,
 						drawingModes: ['polyline','polygon']
 					},
-					polylineOptions: {
-						editable: true
-					},
+					polylineOptions: polyLineOptions,
 					polygonOptions: polyOptions
 				});
 				
@@ -252,7 +260,9 @@ define([
 						var obj = {
 							coordinatesArray : coordinatesString,
 							color : 'red',
-							objecttype : objectType
+							objecttype : objectType,
+							opacity: Number(this._contextObj.get(this.opacityAttr)),
+							lineStrokeWeight: Number(this._contextObj.get(this.lineStrokeWeightAttr)),
 						};
 						
 						// if contextobject is location object not having coordinates yet, it means a single edit mode, block drawing afterwards
@@ -344,10 +354,10 @@ define([
 			// create objects
             dojoArray.forEach(objs, lang.hitch(this,function (obj) {
 				
-			if (obj.coordinatesArray && (obj.objecttype === 'Polygon' | obj.objecttype === 'Polyline')){
-					this._addGeoObject(obj);
-					validCount++;
-				}
+		if (obj.coordinatesArray && (obj.objecttype === 'Polygon' | obj.objecttype === 'Polyline')){
+				this._addGeoObject(obj);
+				validCount++;
+			}
 			
             }));
             
@@ -355,7 +365,12 @@ define([
                 this._googleMap.setZoom(this.lowestZoom);
 
             } 
-			if (validCount > 0){
+			else if (validCount == 1){
+				this._googleMap.fitBounds(this.mapBounds);
+				if (this.overruleFitBoundsZoom){
+					this._googleMap.setZoom(this.lowestZoom);
+				}
+			} else if (validCount > 1){
 				this._googleMap.fitBounds(this.mapBounds);
 			}
 			
@@ -364,7 +379,7 @@ define([
 				this._progressID = null;
             }
 				
-			// needed to set map again if geoobjects where still in cache. if they where in cache then map would be null.
+			// needed to set map again if geoobjects where still in cache. if they were in cache then map would be null.
 			if (this._objectsArr.length > 1){
 				for (var q = 0 ; q < this._objectsArr.length ; q++ ){
 					this._objectsArr[q].setMap(this._googleMap);
@@ -387,6 +402,11 @@ define([
 			this.loadSchema(this.colorAttr, 'color');
 			this.loadSchema(this.holesAttr, 'holesArray');
 			this.loadSchema(this.objectTypeAttr, 'objecttype');	
+			this.loadSchema(this.lineTypeAttr, 'lineType');
+			this.loadSchema(this.lineStrokeWeightAttr, 'lineStrokeWeight');
+			this.loadSchema(this.opacityAttr, 'opacity');
+
+
 			this.loadSchema(this.reverseCoordinatesAttr, 'reverseCoordinates');				
 			
 			// With empty _schema whole object is being pushed, this is a temporary fix
@@ -405,7 +425,7 @@ define([
 						references	: this._refs
 					},
                     callback: dojo.hitch(this, function(result){
-						this.parseObjects(result)
+						this.parseObjects(result);
 					})
                 });
             } else if (!this._contextObj && (xpath.indexOf('[%CurrentObject%]') > -1)) {
@@ -420,7 +440,7 @@ define([
 						references	: this._refs
 					},
                     callback:  dojo.hitch(this, function(result){
-						this.parseObjects(result)
+						this.parseObjects(result);
 					})
                 });
             }
@@ -450,14 +470,17 @@ define([
 				var newObj = {};
 				var entity = objs[i].getEntity();	
 				var entityString = entity.substr(entity.indexOf('.')+1);		
-				newObj['type'] = entityString;								
-				newObj['infowindow'] = this.checkRef(objs[i], 'infowindow', this.infoWindowAttr);
-				newObj['coordinatesArray'] = this.checkRef(objs[i], 'coordinatesArray', this.coordinatesAttr);
-				newObj['color'] = this.checkRef(objs[i], 'color', this.colorAttr);
-				newObj['holesArray'] = this.checkRef(objs[i], 'holesArray', this.holesAttr);	
-				newObj['objecttype'] = this.checkRef(objs[i], 'objecttype', this.objectTypeAttr);
-				newObj['reverseCoordinates'] = this.checkRef(objs[i], 'reverseCoordinates', this.reverseCoordinatesAttr);				
-				newObj['guid'] = objs[i].getGuid();						
+				newObj.type = entityString;								
+				newObj.infowindow = this.checkRef(objs[i], 'infowindow', this.infoWindowAttr);
+				newObj.coordinatesArray = this.checkRef(objs[i], 'coordinatesArray', this.coordinatesAttr);
+				newObj.color = this.checkRef(objs[i], 'color', this.colorAttr);
+				newObj.holesArray = this.checkRef(objs[i], 'holesArray', this.holesAttr);	
+				newObj.objecttype = this.checkRef(objs[i], 'objecttype', this.objectTypeAttr);
+				newObj.reverseCoordinates = this.checkRef(objs[i], 'reverseCoordinates', this.reverseCoordinatesAttr);	
+				newObj.lineType = this.checkRef(objs[i], 'lineType', this.lineTypeAttr);
+				newObj.lineStrokeWeight = this.checkRef(objs[i], 'lineStrokeWeight', this.lineStrokeWeightAttr);	
+				newObj.opacity = Number(this.checkRef(objs[i], 'opacity', this.opacityAttr));		
+				newObj.guid = objs[i].getGuid();						
 				newObjs.push(newObj);
 			}	
 			if (this.consoleLogging){
@@ -500,7 +523,10 @@ define([
                     geoObject.setMap(self._googleMap);
                 }
                 if (index === self._objectCache.length - 1) {
-                    self._googleMap.fitBounds(bounds);
+					self._googleMap.fitBounds(bounds);
+					if (self.overruleFitBoundsZoom){
+						self._googleMap.setZoom(self.lowestZoom);
+					}
 					self._googleMap.setZoom(self.lowestZoom);
                 }
             });
@@ -541,13 +567,16 @@ define([
 				path: path,
 				geodesic: true,
 				fillColor: obj.color,
+				fillOpacity: Number(obj.opacity),
 				strokeColor: obj.color,
-				strokeOpacity: Number(this.strokeOpacity),
-				strokeWeight: this.strokeWeight,
+				strokeOpacity: 3 * Number(obj.opacity),
+				strokeWeight: Number(obj.lineStrokeWeight),
 				center : centerLatLng
 			}
-			if (obj.objecttype === 'Polyline'){
 
+			if (obj.objecttype === 'Polyline'){
+				// set the stying options correcltly for a dotted / dashed line
+				this._setLineStyleOptions(obj.lineType, opts);
 				geoObject = new google.maps.Polyline(opts);
 			} else if (obj.objecttype === 'Polygon'){
 				geoObject = new google.maps.Polygon(opts);			
@@ -610,7 +639,7 @@ define([
 			if (this._objectsArr.length <= 1 && this.enableDraw){
 					google.maps.event.addListener(geoObject, 'mouseup', lang.hitch(this, function (){
 					
-					var MxObj = this._contextObj
+					var MxObj = this._contextObj;
 					var path = geoObject.getPath();
 
 					google.maps.event.addListener(path, 'set_at', lang.hitch(this, function (event){
@@ -676,7 +705,38 @@ define([
 			geoObject.setMap(this._googleMap);
 			this._objectCache.push(geoObject);
 				
-        },
+		},
+		_setLineStyleOptions: function (lineType, styleOptions) {
+			var icon,
+				lineSymbol;
+			if (lineType === "Dotted") {
+
+				lineSymbol = {
+					path: google.maps.SymbolPath.CIRCLE,
+					fillOpacity: 1,
+					scale: 3,
+					strokeWeight: styleOptions.strokeWeight
+				};
+				styleOptions.strokeOpacity = 0;
+
+			} else if (lineType === "Dashed") {
+				lineSymbol = {
+					path: 'M 0,-1 0,1',
+					strokeOpacity: 1,
+					scale: 4,
+					strokeWeight: styleOptions.strokeWeight
+				};
+				styleOptions.strokeOpacity = 0;
+			}
+			var icons = [{
+				icon: lineSymbol,
+				offset: '0',
+				repeat: '20px'
+			}];
+			styleOptions.icons = icons;
+
+			return styleOptions;
+		},
 		shadeColor2 : function(color, percent) {
 			var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
 			return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
@@ -722,10 +782,10 @@ define([
 			// reset mapbounds for current object. later on needed to get center to position infowindow correctly
 			this.mapBoundsCurrent = new google.maps.LatLngBounds();
 			
-			var lat = new Array;
-			var lng = new Array;
+			var lat = [];
+			var lng = [];
 			var coordinate;
-			var polyArray = new Array;
+			var polyArray = [];
 			var coordinatesNo = coordinates.length;
 			
 			coordinates[0] = coordinates[0].replace("(","");
