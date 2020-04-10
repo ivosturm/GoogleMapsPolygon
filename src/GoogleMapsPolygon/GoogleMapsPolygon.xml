@@ -208,7 +208,7 @@ iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
 		 <property key="lineStrokeWeightAttr" type="attribute" entityProperty="mapEntity" required="false" isPath="optional" pathType="reference">
             <caption>Line Stroke Weight</caption>
             <category>Line</category>
-            <description>The stroke weight (thickness) of the GEOJSON line.</description> 
+            <description>The stroke weight (thickness) of the polyine.</description> 
             <attributeTypes>
                 <attributeType name="Integer"/>
             </attributeTypes>
