@@ -22,6 +22,7 @@
 	v2.3	Added setZoom(this.lowestZoom) to use case where only one object is plotted via overruleFitBounds setting from Studio Pro
 			Added LineType + LineStrokeWeight for Polylines. Added opacity for polygons. 
 			Some jsHint fixes. 
+	v2.4	Added extra support for coordinates arrays with square brackets in stead of normal brackets. These typically are seen in geoJSON formats.
 */
 
 define([
@@ -551,8 +552,11 @@ define([
         },
         _addGeoObject: function (obj) {
 			
+			// if square brackets used, switch to normal brackets
+			var coordinatesString = obj.coordinatesArray.replace(/\[/g,"(").replace(/\]/g,")").replace(/ /g,"");
+ 	
 			// split string into array of coordinates
-			var coordinates  = obj.coordinatesArray.split("),(");
+			var coordinates  = coordinatesString.split("),(");
 			
 			// create Google path from array of coordinates
 			var path =  this._constructPolyArray(coordinates,obj.reverseCoordinates,true);
@@ -787,7 +791,7 @@ define([
 			var coordinate;
 			var polyArray = [];
 			var coordinatesNo = coordinates.length;
-			
+
 			coordinates[0] = coordinates[0].replace("(","");
 			
 			coordinates[coordinatesNo - 1] = coordinates[coordinatesNo -1].replace(")","");
