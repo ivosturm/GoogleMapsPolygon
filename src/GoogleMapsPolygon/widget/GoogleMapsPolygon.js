@@ -4,9 +4,9 @@
     ========================
 
     @file      : GoogleMapsPolygon.js
-    @version   : 2.3.0
+    @version   : 2.4.0
     @author    : Ivo Sturm
-    @date      : 10-4-2020
+    @date      : 13-3-2021
     @copyright : First Consulting
     @license   : Apache v2
 
@@ -559,7 +559,9 @@ define([
 			var coordinates  = coordinatesString.split("),(");
 			
 			// create Google path from array of coordinates
-			var path =  this._constructPolyArray(coordinates,obj.reverseCoordinates,true);
+			var path =  this._
+			
+			tPolyArray(coordinates,obj.reverseCoordinates,true);
 			
 			// get center of current Google path
 			var centerLatLng = this.mapBoundsCurrent.getCenter();
